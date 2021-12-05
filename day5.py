@@ -2,12 +2,6 @@
 lines = open("data/day5.txt").read().splitlines()
 
 
-def sign(n):
-    if n == 0:
-        return 0
-    return 1 if n > 0 else -1
-
-
 def get_crossings(count_diagonal=False):
     points = set()
     crossings = set()
@@ -16,10 +10,10 @@ def get_crossings(count_diagonal=False):
         [from_x, from_y] = [int(i) for i in fro.split(",")]
         [to_x, to_y] = [int(i) for i in to.split(",")]
         if count_diagonal or from_x == to_x or from_y == to_y:
-            dx = sign(to_x-from_x)
-            dy = sign(to_y-from_y)
-            n = max(abs(to_x-from_x), abs(to_y-from_y))+1
-            for i in range(0, n):
+            n = max(abs(to_x-from_x), abs(to_y-from_y))
+            dx = (to_x-from_x)/n
+            dy = (to_y-from_y)/n
+            for i in range(0, n+1):
                 point = (from_x+dx*i, from_y+dy*i)
                 if point in points:
                     crossings.add(point)
