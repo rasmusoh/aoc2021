@@ -27,8 +27,8 @@ segments_by_digit = {
     9: set(["a", "b", "c", "d", "f", "g"]),
 }
 
-# digits_by_nr_segments = {2: set([1]), 3: set([7]), 4: set([
-#     4]), 5: set([2, 3, 5]), 6: set([6, 9]), 7: set([8])},
+digits_by_nr_segments = {2: set([1]), 3: set([7]), 4: set([
+    4]), 5: set([2, 3, 5]), 6: set([6, 9]), 7: set([8])},
 possible_by_nr_segments = [set() for _ in range(10)]
 for digit in segments_by_digit:
     possible_by_nr_segments[len(segments_by_digit[digit])
@@ -59,6 +59,7 @@ def propagate_contstraints(encoding):
                 if k != letter and v in encoding[letter]:
                     encoding[letter].remove(v)
                     propagated += 1
+                    print("propagated step:",encoding)
         if propagated == 0:
             return
 
@@ -68,17 +69,19 @@ def find_encoding(pattern):
     for seg in segments:
         encoding[seg] = set(segments)
     for digit in (pattern["signal"]+pattern["output"]):
+        print(digit)
         for letter in digit:
             encoding[letter] &= possible_by_nr_segments[len(digit)]
     queue = [encoding]
+    print("enc: ",encoding)
     while len(queue) > 0:
         hyps = generate_hypotheticals(queue.pop())
         for hyp in hyps:
-            print(hyp)
+            print("hyp: ",hyp)
             propagate_contstraints(hyp)
-            print(hyp)
+            print("propagated:",hyp)
             if all([len(v) == 1 for v in hyp.values()]):
-                return [(k, next(iter(v))) for (k, v) in hyp]
+                return {k: next(iter(v)) for (k, v) in hyp.items()}
             elif not any([len(v) == 0 for v in hyp.values()]):
                 queue.append(hyp)
 
@@ -86,13 +89,14 @@ def find_encoding(pattern):
 
 
 def decode(encoding, digit):
+    print(encoding)
     decoded=[encoding[letter] for letter in digit]
     for i in range(10):
         if len(decoded) == len(segments_by_digit[i]) and all([s in segments_by_digit[i] for s in decoded]):
             return i
 
-
 for pattern in patterns:
     encoding=find_encoding(pattern)
+    print(pattern)
     for digit in pattern["output"]:
-        print(decode(encoding, digit))
+        print(digit, decode(encoding, digit))
