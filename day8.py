@@ -1,5 +1,3 @@
-import copy
-import math
 
 lines = open("data/day8.txt").read().splitlines()
 
@@ -22,12 +20,13 @@ n = len(segments)
 
 
 def constraints_from_lengths(encoded_digits):
-    cs = [set(segments) for _ in segments]
-    for nr in encoded_digits:
-        if len(nr) in len_to_segments:
-            for c in nr:
-                cs[segments.index(c)] = len_to_segments[len(nr)].copy()
-    return cs
+    constraints = [set(segments) for _ in segments]
+    for digit in encoded_digits:
+        if len(digit) in len_to_segments:
+            for char in digit:
+                i = segments.index(char)
+                constraints[i] = len_to_segments[len(digit)].copy()
+    return constraints
 
 
 def enumerate_encodings(constraints, determined=[]):
