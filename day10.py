@@ -2,33 +2,24 @@ lines = open("data/day10.txt").read().splitlines()
 
 
 matching = {"(": ")", "[": "]", "{": "}", "<": ">"}
+corruption_points = {")": 3, "]": 57, "}": 1197, ">": 25137}
 completion_points = {")": 1, "]": 2, "}": 3, ">": 4}
 
 
 def corrupted_score(line):
     stack = [line[0:1]]
     for char in line[1:]:
-        if char in ["(", "[", "{", "<"]:
+        if char in matching.keys():
             stack.append(char)
-        elif char == ")":
-            if stack.pop() != "(":
-                return 3
-        elif char == "]":
-            if stack.pop() != "[":
-                return 57
-        elif char == "}":
-            if stack.pop() != "{":
-                return 1197
-        elif char == ">":
-            if stack.pop() != "<":
-                return 25137
+        elif char != matching[stack.pop()]:
+            return corruption_points[char]
     return 0
 
 
 def completion_score(line):
     stack = [line[0:1]]
     for char in line[1:]:
-        if char in ["(", "[", "{", "<"]:
+        if char in matching.keys():
             stack.append(char)
         else:
             stack.pop()
