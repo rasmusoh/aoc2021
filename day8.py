@@ -25,7 +25,7 @@ def constraints_from_lengths(encoded_digits):
         if len(digit) in len_to_segments:
             for char in digit:
                 i = segments.index(char)
-                constraints[i] = len_to_segments[len(digit)].copy()
+                constraints[i] = len_to_segments[len(digit)]
     return constraints
 
 
