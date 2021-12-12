@@ -5,17 +5,19 @@ for line in lines:
     graph[fro].append(to)
     graph[to].append(fro)
 
-def get_paths(graph, current_path=["start"], one_double_visit=False):
-    current = current_path[-1]
+
+def get_paths(graph, path=["start"], one_double_visit=False):
+    current = path[-1]
     if "end" == current:
-        yield current_path
-    else:
-        for n in graph[current]:
-            if n[0].isupper() or n not in current_path: 
-                yield from get_paths(graph, current_path+[n], one_double_visit)
-            elif n != "start" and one_double_visit:
-                yield from get_paths(graph, current_path+[n], False)
+        yield path
+        return
+    for node in graph[current]:
+        if node[0].isupper() or node not in path:
+            yield from get_paths(graph, path+[node], one_double_visit)
+        elif node != "start" and one_double_visit:
+            yield from get_paths(graph, path+[node], False)
+
 
 print(len([p for p in get_paths(graph)]))
 print("part2")
-print(len([p for p in get_paths(graph,one_double_visit=True)]))
+print(len([p for p in get_paths(graph, one_double_visit=True)]))
