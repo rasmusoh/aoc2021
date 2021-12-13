@@ -1,102 +1,74 @@
-import copy
 
-lines = open("data/day8.test.txt").read().splitlines()
-
-
-easy_digits = 0
-patterns = []
-for line in lines:
-    [signal, output] = line.split(" | ")
-    patterns.append({"signal": signal.split(), "output": output.split()})
-
-print(len([d for pattern in patterns for d in pattern["output"]
-      if len(d) in [2, 3, 4, 7]]))
-
-print("part2")
-
-segments_by_digit = {
-    0: set(["a", "b", "c", "e", "f", "g"]),
-    1: set(["c", "f"]),
-    2: set(["a", "c", "d", "e", "g"]),
-    3: set(["a", "c", "d", "f", "g"]),
-    4: set(["b", "c", "d", "f"]),
-    5: set(["a", "b", "d", "f", "g"]),
-    6: set(["a", "b", "d", "e", "f", "g"]),
-    7: set(["a",  "c",  "f"]),
-    8: set(["a", "b", "c", "d", "e", "f", "g"]),
-    9: set(["a", "b", "c", "d", "f", "g"]),
-}
-
-digits_by_nr_segments = {2: set([1]), 3: set([7]), 4: set([
-    4]), 5: set([2, 3, 5]), 6: set([6, 9]), 7: set([8])},
-possible_by_nr_segments = [set() for _ in range(10)]
-for digit in segments_by_digit:
-    possible_by_nr_segments[len(segments_by_digit[digit])
-                            ] |= segments_by_digit[digit]
+lines = open("data/day8.txt").read().splitlines()
 
 segments = ["a", "b", "c", "d", "e", "f", "g"]
+digit_segments = [
+    set(["a", "b", "c", "e", "f", "g"]),
+    set(["c", "f"]),
+    set(["a", "c", "d", "e", "g"]),
+    set(["a", "c", "d", "f", "g"]),
+    set(["b", "c", "d", "f"]),
+    set(["a", "b", "d", "f", "g"]),
+    set(["a", "b", "d", "e", "f", "g"]),
+    set(["a",  "c",  "f"]),
+    set(["a", "b", "c", "d", "e", "f", "g"]),
+    set(["a", "b", "c", "d", "f", "g"]),
+]
+len_to_segments = {2: digit_segments[1],
+                   3: digit_segments[7], 4: digit_segments[4]}
+n = len(segments)
 
 
-def generate_hypotheticals(encoding):
-    hyps = []
-    [letter, possiblevals] = min(
-        [(k, v) for (k, v) in encoding.items() if len(v) > 1], key=lambda x: len(x[1]))
-    for val in possiblevals:
-        hyp = copy.deepcopy(encoding)
-        hyp[letter] = set(val)
-        hyps.append(hyp)
-    return hyps
+def constraints_from_lengths(encoded_digits):
+    constraints = [set(segments) for _ in segments]
+    for digit in encoded_digits:
+        if len(digit) in len_to_segments:
+            for char in digit:
+                i = segments.index(char)
+                constraints[i] = len_to_segments[len(digit)]
+    return constraints
 
 
-def propagate_contstraints(encoding):
-    while True:
-        propagated = 0
-        determined = [(k, next(iter(v)))
-                      for (k, v) in encoding.items() if len(v) == 1]
-        for letter in encoding:
-            for (k, v) in determined:
-
-                if k != letter and v in encoding[letter]:
-                    encoding[letter].remove(v)
-                    propagated += 1
-                    print("propagated step:",encoding)
-        if propagated == 0:
-            return
-
-
-def find_encoding(pattern):
-    encoding = {}
+def enumerate_encodings(constraints, determined=[]):
+    i = len(determined)
+    if i == n:
+        yield {segments[i]: determined[i] for i in range(n)}
+        return
     for seg in segments:
-        encoding[seg] = set(segments)
-    for digit in (pattern["signal"]+pattern["output"]):
-        print(digit)
-        for letter in digit:
-            encoding[letter] &= possible_by_nr_segments[len(digit)]
-    queue = [encoding]
-    print("enc: ",encoding)
-    while len(queue) > 0:
-        hyps = generate_hypotheticals(queue.pop())
-        for hyp in hyps:
-            print("hyp: ",hyp)
-            propagate_contstraints(hyp)
-            print("propagated:",hyp)
-            if all([len(v) == 1 for v in hyp.values()]):
-                return {k: next(iter(v)) for (k, v) in hyp.items()}
-            elif not any([len(v) == 0 for v in hyp.values()]):
-                queue.append(hyp)
-
-    raise copy.Error("nothing found")
+        if seg not in constraints[i] or seg in determined:
+            continue
+        yield from enumerate_encodings(constraints, determined+[seg])
 
 
 def decode(encoding, digit):
-    print(encoding)
-    decoded=[encoding[letter] for letter in digit]
+    s = {encoding[letter] for letter in digit}
     for i in range(10):
-        if len(decoded) == len(segments_by_digit[i]) and all([s in segments_by_digit[i] for s in decoded]):
+        if digit_segments[i] == s:
             return i
+    return None
 
-for pattern in patterns:
-    encoding=find_encoding(pattern)
-    print(pattern)
-    for digit in pattern["output"]:
-        print(digit, decode(encoding, digit))
+
+def find_encoding(encoded_digits):
+    constraints = constraints_from_lengths(encoded_digits)
+    for encoding in enumerate_encodings(constraints):
+        if all([decode(encoding, digit) != None for digit in encoded_digits]):
+            return encoding
+    return None
+
+
+easy_digits = 0
+tot = 0
+for line in lines:
+    [s, o] = line.split(" | ")
+    all_digits = o.split()+s.split()
+    output = o.split()
+
+    easy_digits += len([d for d in output if len(d) in [2, 3, 4, 7]])
+
+    encoding = find_encoding(all_digits)
+    tot += int("".join([str(decode(encoding, digit))
+               for digit in output]))
+
+print(easy_digits)
+print("part2")
+print(tot)
