@@ -18,6 +18,6 @@ def get_paths(graph, path=["start"], one_double_visit=False):
             yield from get_paths(graph, path+[node], False)
 
 
-print(len([p for p in get_paths(graph)]))
+print(len(list(get_paths(graph))))
 print("part2")
-print(len([p for p in get_paths(graph, one_double_visit=True)]))
+print(len(list(get_paths(graph, one_double_visit=True))))
