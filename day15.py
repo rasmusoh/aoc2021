@@ -21,12 +21,11 @@ def neighbors(grid, x, y):
 
 def shortest_path(grid):
     goal = Point(len(grid[0])-1, len(grid)-1)
-    q = []
     def h(p): return goal.x-p.x+goal.y-p.y
-    mincost = {}
     start = Point(0, 0)
+    mincost = {start: 0}
+    q = []
     heapq.heappush(q, Node(h(start), 0, start))
-    mincost[start] = 0
     while len(q) > 0:
         node = heapq.heappop(q)
         if node.pos.x == goal.x and node.pos.y == goal.y:
@@ -45,6 +44,7 @@ def expand_grid(grid, n, m):
     b = np.concatenate([a+i for i in range(n)])
     c = np.concatenate([b+i for i in range(m)], 1)
     return np.mod(c, 9)+1
+
 
 grid = [[int(c) for c in line] for line in lines]
 print(shortest_path(grid))
