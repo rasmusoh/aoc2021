@@ -46,14 +46,14 @@ def neighbors(state, grid, depth):
                 while grid[new_y][goal_x] != '.':
                     new_y -= 1
                 newstate[i] = Pod(pod.kind, goal_x, new_y, True)
-                yield newstate, move_cost(pod, goal_x, new_y)
+                yield tuple(newstate), move_cost(pod, goal_x, new_y)
         elif way_out(pod, grid):
             for x in allowed:
                 if hallway_free(grid, pod.x, x):
                     newstate = list(state)
                     new_y = 0
                     newstate[i] = Pod(pod.kind, x, new_y, False)
-                    yield newstate, move_cost(pod, x, new_y)
+                    yield tuple(newstate), move_cost(pod, x, new_y)
 
 
 def h(state):
@@ -86,7 +86,7 @@ def shortest_path(start, depth):
             totcost = node.cost+cost
             new_node = Node(h(neighbor) +
                             totcost, totcost, neighbor)
-            new_node_set = tuple(new_node.state)
+            new_node_set = new_node.state
             if new_node_set not in mincost or mincost[new_node_set] > new_node.cost:
                 mincost[new_node_set] = cost
                 heapq.heappush(q, new_node)
