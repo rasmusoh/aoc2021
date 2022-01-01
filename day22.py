@@ -95,7 +95,6 @@ for step in steps:
 print(count(root))
 print("part 2")
 root = Node(Cuboid(0, -1, 0, -1, 0, -1), [])
-init_bounds = Cuboid(-50, 50, -50, 50, -50, 50)
 for step in steps:
     insert(root, step.bounds, step.on)
 print(count(root))
